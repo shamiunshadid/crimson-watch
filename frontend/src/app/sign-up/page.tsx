@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, Variants } from "motion/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import Link from "next/link";
 // import { useTheme } from "next-themes";
 
 // Animation variants
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -31,7 +31,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -44,7 +44,7 @@ const itemVariants = {
   },
 };
 
-const fadeInVariants = {
+const fadeInVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -54,7 +54,7 @@ const fadeInVariants = {
   },
 };
 
-const scaleInVariants = {
+const scaleInVariants: Variants = {
   hidden: { opacity: 0, scale: 0.95 },
   visible: {
     opacity: 1,
@@ -71,14 +71,14 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isHovered, setIsHovered] = useState<string | null>(null);
-//   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+//   const [isHovered, setIsHovered] = useState<string | null>(null);
+// //   const { theme, setTheme } = useTheme();
+//   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
-  useState(() => {
-    setMounted(true);
-  });
+  // useState(() => {
+  //   setMounted(true);
+  // });
 
   const features = [
     "Real exam simulations",
@@ -201,6 +201,8 @@ export default function SignUpPage() {
         <motion.div 
           className="w-full max-w-md"
           variants={scaleInVariants}
+          // initial="hidden"
+          // animate="visible"
         >
           {/* Mobile Logo */}
           <motion.div 
@@ -327,9 +329,9 @@ export default function SignUpPage() {
               <motion.button
                 type="button"
                 className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background font-medium text-sm text-foreground transition-all duration-200 hover:bg-secondary hover:border-border hover:shadow-sm active:scale-[0.98] cursor-pointer"
-                onMouseEnter={() => setIsHovered("google")}
-                onMouseLeave={() => setIsHovered(null)}
-                whileHover={{ scale: 1.01 }}
+                // onMouseEnter={() => setIsHovered("google")}
+                // onMouseLeave={() => setIsHovered(null)}
+                // whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -362,9 +364,9 @@ export default function SignUpPage() {
               <motion.button
                 type="button"
                 className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background font-medium text-sm text-foreground transition-all duration-200 hover:bg-secondary hover:border-border hover:shadow-sm active:scale-[0.98] cursor-pointer"
-                onMouseEnter={() => setIsHovered("linkedin")}
-                onMouseLeave={() => setIsHovered(null)}
-                whileHover={{ scale: 1.01 }}
+                // onMouseEnter={() => setIsHovered("linkedin")}
+                // onMouseLeave={() => setIsHovered(null)}
+                // whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
