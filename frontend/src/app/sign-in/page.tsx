@@ -317,7 +317,7 @@ export default function SignInPage() {
           </motion.div>
 
           {/* Terms */}
-          <motion.p 
+          {/* <motion.p 
             className="text-center text-xs text-muted-foreground mt-6 px-4"
             variants={itemVariants}
           >
@@ -329,7 +329,7 @@ export default function SignInPage() {
             <a href="#" className="underline underline-offset-2 hover:text-foreground transition-colors">
               Privacy Policy
             </a>
-          </motion.p>
+          </motion.p> */}
         </motion.div>
       </motion.div>
 
