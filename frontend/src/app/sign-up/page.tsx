@@ -14,7 +14,8 @@ import {
   ArrowRight,
   GraduationCap,
   BookOpen,
-  CheckCircle2
+  CheckCircle2,
+  User
 } from "lucide-react";
 import Link from "next/link";
 // import { useTheme } from "next-themes";
@@ -70,6 +71,7 @@ const scaleInVariants: Variants = {
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 //   const [isHovered, setIsHovered] = useState<string | null>(null);
 // //   const { theme, setTheme } = useTheme();
@@ -253,6 +255,23 @@ export default function SignUpPage() {
 
             {/* Form */}
             <motion.form className="space-y-5" variants={containerVariants}>
+              {/* Name Field */}
+              <motion.div className="space-y-2" variants={itemVariants}>
+                <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                  Full name
+                </Label>
+                <div className="relative group">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </motion.div>
               {/* Email Field */}
               <motion.div className="space-y-2" variants={itemVariants}>
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">
