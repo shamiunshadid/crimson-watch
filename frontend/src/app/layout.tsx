@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Serif, Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/Theme/theme-provider";
+import { Toaster } from "@/components/ui/sonner"
 
 const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -49,6 +50,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
         {children}
+        <Toaster position="top-center" richColors/>
         </ThemeProvider>
       </body>
     </html>
