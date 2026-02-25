@@ -18,7 +18,13 @@ import {
   User
 } from "lucide-react";
 import Link from "next/link";
-// import { useTheme } from "next-themes";
+
+import {useForm} from "react-hook-form"
+import { registrationAction } from "./action";
+import {RegisterUserData, registerUserSchema} from "@/features/auth/auth.schema"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Animation variants
 const containerVariants: Variants = {
@@ -68,25 +74,50 @@ const scaleInVariants: Variants = {
   },
 };
 
+
+
+const features = [
+  "Real exam simulations",
+  "AI-powered feedback",
+  "Progress tracking"
+];
+
+
 export default function SignUpPage() {
+  
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-//   const [isHovered, setIsHovered] = useState<string | null>(null);
-// //   const { theme, setTheme } = useTheme();
-//   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
-  // useState(() => {
-  //   setMounted(true);
-  // });
+  const {
+    register, 
+    handleSubmit, 
+    formState: {errors}
+  } = useForm({
+    //        This one is real function (registerUserSchema)
+    resolver: zodResolver(registerUserSchema)
+  });
 
-  const features = [
-    "Real exam simulations",
-    "AI-powered feedback",
-    "Progress tracking"
-  ];
+  const router = useRouter();
+
+
+
+  //                   This one is type (RegisterUserData)
+  const onSubmit = async (data: RegisterUserData  )=>{
+
+    const result = await registrationAction(data);
+
+    
+    if (result.status === "SUCCESS") {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
+    
+    if(result.status === "SUCCESS"){
+      router.push("/dashboard")
+    }
+  }
+
+
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-background">
@@ -203,8 +234,6 @@ export default function SignUpPage() {
         <motion.div 
           className="w-full max-w-md"
           variants={scaleInVariants}
-          // initial="hidden"
-          // animate="visible"
         >
           {/* Mobile Logo */}
           <motion.div 
@@ -217,31 +246,11 @@ export default function SignUpPage() {
             <span className="text-xl font-semibold text-foreground">IELTS Master</span>
           </motion.div>
 
-          {/* Theme Toggle */}
-          {/* <motion.div 
-            className="flex justify-end mb-6"
-            variants={itemVariants}
-          >
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="rounded-full w-9 h-9"
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-4 h-4" />
-                ) : (
-                  <Moon className="w-4 h-4" />
-                )}
-              </Button>
-            )}
-          </motion.div> */}
-
           {/* Form Card */}
-          <motion.div 
+          <motion.form 
             className="bg-card rounded-2xl border border-border/50 p-8 card-shadow"
             variants={itemVariants}
+            onSubmit={handleSubmit(onSubmit)}
           >
             {/* Header */}
             <motion.div className="mb-8" variants={itemVariants}>
@@ -254,22 +263,30 @@ export default function SignUpPage() {
             </motion.div>
 
             {/* Form */}
-            <motion.form className="space-y-5" variants={containerVariants}>
+            <motion.div 
+              className="space-y-5" 
+              variants={containerVariants} 
+            >
               {/* Name Field */}
               <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
                   Full name
                 </Label>
                 <div className="relative group">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                   <Input
-                    id="name"
+                    id="fullName"
                     type="text"
                     placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    required
+                    {...register("fullName")}
                     className="pl-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
+                </div>
+                <div>
+                  {errors && <p className="text-sm text-destructive">
+                    {errors.fullName?.message}
+                </p>}
                 </div>
               </motion.div>
               {/* Email Field */}
@@ -283,10 +300,15 @@ export default function SignUpPage() {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    {...register("email")}
                     className="pl-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
+                </div>
+                <div>
+                  {errors && <p className="text-sm text-destructive">
+                    {errors.email?.message}
+                </p>}
                 </div>
               </motion.div>
 
@@ -301,8 +323,8 @@ export default function SignUpPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a strong password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    {...register("password")}
                     className="pl-10 pr-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <button
@@ -317,22 +339,23 @@ export default function SignUpPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  Must be at least 8 characters
-                </p>
+                <div>
+                  {errors && <p className="text-sm text-destructive">
+                    {errors.password?.message}
+                </p>}
+                </div>
               </motion.div>
 
               {/* Sign Up Button */}
               <motion.div variants={itemVariants}>
                 <Button
-                  type="submit"
                   className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md active:scale-[0.98] group cursor-pointer"
                 >
                   <span>Create account</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
               </motion.div>
-            </motion.form>
+            </motion.div>
 
             {/* Divider */}
             <motion.div className="relative my-6" variants={itemVariants}>
@@ -348,9 +371,6 @@ export default function SignUpPage() {
               <motion.button
                 type="button"
                 className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background font-medium text-sm text-foreground transition-all duration-200 hover:bg-secondary hover:border-border hover:shadow-sm active:scale-[0.98] cursor-pointer"
-                // onMouseEnter={() => setIsHovered("google")}
-                // onMouseLeave={() => setIsHovered(null)}
-                // whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -372,8 +392,6 @@ export default function SignUpPage() {
                   />
                 </svg>
                 <motion.span
-                //   animate={{ x: isHovered === "google" ? 2 : 0 }}
-                //   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   Google
                 </motion.span>
@@ -383,17 +401,12 @@ export default function SignUpPage() {
               <motion.button
                 type="button"
                 className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background font-medium text-sm text-foreground transition-all duration-200 hover:bg-secondary hover:border-border hover:shadow-sm active:scale-[0.98] cursor-pointer"
-                // onMouseEnter={() => setIsHovered("linkedin")}
-                // onMouseLeave={() => setIsHovered(null)}
-                // whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                 </svg>
                 <motion.span
-                //   animate={{ x: isHovered === "linkedin" ? 2 : 0 }}
-                //   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   LinkedIn
                 </motion.span>
@@ -413,7 +426,7 @@ export default function SignUpPage() {
                 Sign in
               </Link>
             </motion.p>
-          </motion.div>
+          </motion.form>
 
           {/* Terms */}
           <motion.p 
