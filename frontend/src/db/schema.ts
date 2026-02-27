@@ -13,10 +13,10 @@ export const users = pgTable("users", {
 export const sessions = pgTable("sessions", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer().notNull().references(()=> users.id, {onDelete: "cascade"}),
-    sessionToken: text(),
+    sessionToken: text().notNull().unique(),
     userAgent: text(),
     ip: varchar({length: 45}).notNull(),
-    expiresAt: timestamp().defaultNow().notNull(),
+    expiresAt: timestamp().notNull(),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
 });
