@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import argon2 from "argon2"
+import { setSessionToCookies } from "@/features/auth/server/use-cases/sessions";
 
 
 export interface Data {
@@ -30,7 +31,11 @@ export const registrationAction = async (data: Data) => {
     const hashedPassword = await argon2.hash(password)
 
     // insert to database
-    await db.insert(users).values({fullName, email, password: hashedPassword})
+    const [result] = await db.insert(users).values({fullName, email, password: hashedPassword}).returning()
+
+    await setSessionToCookies(result.id)
+
+
 
     return {
         status: "SUCCESS",
