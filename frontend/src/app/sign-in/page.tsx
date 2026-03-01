@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Mail, 
   Lock, 
@@ -16,8 +15,14 @@ import {
   GraduationCap,
   BookOpen,
 } from "lucide-react";
-// import { useTheme } from "next-themes";
 import Link from "next/link";
+import {useForm} from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInAction } from "./action";
+import { SignInUserData, signInUserSchema } from "@/features/auth/auth.schema";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 
 // Animation variants
 const containerVariants: Variants = {
@@ -69,17 +74,33 @@ const scaleInVariants: Variants = {
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  // const [isHovered, setIsHovered] = useState<string | null>(null);
-  // const { theme, setTheme } = useTheme();
-  // const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
-  // useState(() => {
-  //   setMounted(true);
-  // });
+  const {
+    register, 
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
+    resolver: zodResolver(signInUserSchema)
+  });
+
+
+  const router = useRouter();
+
+  const onSubmit = async(data: SignInUserData)=>{
+    const result = await signInAction(data);
+
+    if (result.status === "SUCCESS") {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
+    
+    if(result.status === "SUCCESS"){
+      router.push("/dashboard")
+    }
+    
+  }
+
 
   const stats = [
     { value: "50K+", label: "Students" },
@@ -111,27 +132,6 @@ export default function SignInPage() {
             <span className="text-xl font-semibold text-foreground">IELTS Master</span>
           </motion.div>
 
-          {/* Theme Toggle */}
-          {/* <motion.div 
-            className="flex justify-end mb-6"
-            variants={itemVariants}
-          >
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="rounded-full w-9 h-9"
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-4 h-4" />
-                ) : (
-                  <Moon className="w-4 h-4" />
-                )}
-              </Button>
-            )}
-          </motion.div> */}
-
           {/* Form Card */}
           <motion.div 
             className="bg-card rounded-2xl border border-border/50 p-8 card-shadow"
@@ -148,7 +148,11 @@ export default function SignInPage() {
             </motion.div>
 
             {/* Form */}
-            <motion.form className="space-y-5" variants={containerVariants}>
+            <motion.form 
+            className="space-y-5" 
+            variants={containerVariants}
+            onSubmit={handleSubmit(onSubmit)}
+            >
               {/* Email Field */}
               <motion.div className="space-y-2" variants={itemVariants}>
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">
@@ -160,10 +164,14 @@ export default function SignInPage() {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                     className="pl-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
+                </div>
+                <div>
+                  {errors && <p className="text-sm text-destructive">
+                    {errors.email?.message}
+                </p>}
                 </div>
               </motion.div>
 
@@ -186,8 +194,7 @@ export default function SignInPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                     className="pl-10 pr-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <button
@@ -202,10 +209,15 @@ export default function SignInPage() {
                     )}
                   </button>
                 </div>
+                <div>
+                  {errors && <p className="text-sm text-destructive">
+                    {errors.password?.message}
+                </p>}
+                </div>
               </motion.div>
 
               {/* Remember Me */}
-              <motion.div 
+              {/* <motion.div 
                 className="flex items-center gap-2"
                 variants={itemVariants}
               >
@@ -221,7 +233,7 @@ export default function SignInPage() {
                 >
                   Remember me for 30 days
                 </Label>
-              </motion.div>
+              </motion.div> */}
 
               {/* Sign In Button */}
               <motion.div variants={itemVariants}>
