@@ -1,6 +1,5 @@
 // This is for more security, I mean using zod for more type safe and sanitize the inputs.
 
-
 import z from "zod";
 
 export const registerUserSchema = z.object({
@@ -21,10 +20,13 @@ export const registerUserSchema = z.object({
 
 export type RegisterUserData = z.infer<typeof registerUserSchema>;
 
-
 export const signInUserSchema = z.object({
-  email: z.email("Please provide a valid email adress..").trim().toLowerCase().max(100, "Email must be under 100 characters."),
-  password: z.string().min(8, "Password must be atleast 8 characters long.")
+  email: z
+    .email("Please provide a valid email adress..")
+    .trim()
+    .toLowerCase()
+    .max(100, "Email must be under 100 characters."),
+  password: z.string().min(8, "Password must be atleast 8 characters long."),
 });
 
 export type SignInUserData = z.infer<typeof signInUserSchema>;
