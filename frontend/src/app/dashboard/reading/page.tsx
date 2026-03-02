@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// import { Progress } from "@/components/ui/progress";
 import {
   BookOpen,
   Clock,
@@ -353,7 +352,7 @@ export default function ReadingPage() {
                         </div>
 
                           {/* Here I need to put a real link */}
-                        <Link href={`/dashboard/test/something`}>
+                        <Link href={`/dashboard/reading/test/something`}>
                           <Button className="w-full">
                             Start Test
                             <ChevronRight className="w-4 h-4 ml-1" />
@@ -441,7 +440,7 @@ export default function ReadingPage() {
                         </div>
 
                           {/* Here also need to put real link which will come from db */}
-                        <Link href={`/dashboard/test/something`}>
+                        <Link href={`/dashboard/reading/test/something`}>
                           <Button
                             className="w-full hover:text-white"
                             variant={"outline"}
