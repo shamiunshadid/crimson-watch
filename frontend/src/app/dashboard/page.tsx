@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./_components/Sidebar";
 import { DashboardHeader } from "./_components/Dashboard-header";
@@ -10,7 +10,7 @@ import { StatsSection } from "./_components/Stats-section";
 import { AIAssistant } from "./_components/Ai-assistant";
 
 export default function DashboardPage() {
-  const [isAIOpen, setIsAIOpen] = useState(true);
+  const [isAIOpen, setIsAIOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +44,9 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
+            <div className="">
             <TestCards />
+            </div>
           </motion.section>
 
           {/* Stats Section */}
