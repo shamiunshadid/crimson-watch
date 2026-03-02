@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Bell, Search, Calendar } from "lucide-react";
 
@@ -30,11 +30,11 @@ export function DashboardHeader() {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 hover:text-white">
           <Search className="w-4 h-4" />
           <span className="hidden sm:inline">Search</span>
         </Button>
-        <Button variant="outline" size="icon" className="relative">
+        <Button variant="outline" size="icon" className="relative hover:text-white">
           <Bell className="w-4 h-4" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-accent-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
             3

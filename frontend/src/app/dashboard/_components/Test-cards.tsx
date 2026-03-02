@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
-import type {Variants} from "motion/react"
+import { motion, Variants } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,10 +10,11 @@ import {
   Mic,
   Clock,
   Target,
-  TrendingUp,
   ArrowRight,
+  BadgeCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface TestCardProps {
   title: string;
@@ -35,7 +35,7 @@ interface TestCardProps {
 const testTypes: Omit<TestCardProps, "icon">[] = [
   {
     title: "Reading",
-    description: "Practice reading comprehension with academic passages",
+    description: "Practice reading comprehension with academic",
     color: "text-amber-600 dark:text-amber-400",
     bgColor: "bg-amber-50 dark:bg-amber-950/30",
     stats: { testsCompleted: 12, avgScore: 7.0, improvement: 0.5 },
@@ -82,7 +82,7 @@ const iconMap = {
   Speaking: Mic,
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -92,7 +92,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -121,12 +121,12 @@ function TestCard({
       <Card className="group overflow-hidden border-border/50 hover:border-border hover:shadow-lg transition-all duration-300">
         <CardContent className="p-0">
           {/* Header */}
-          <div className={cn("p-6", bgColor)}>
+          <div className={cn("p-4", bgColor)}>
             <div className="flex items-start justify-between mb-4">
               <motion.div
                 className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center",
-                  "bg-background dark:bg-background/50 shadow-sm"
+                  "bg-background dark:bg-background/50 shadow-sm",
                 )}
                 whileHover={{ scale: 1.05, rotate: 3 }}
               >
@@ -137,16 +137,21 @@ function TestCard({
                 {duration}
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">{title}</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">
+              {title}
+            </h3>
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
 
           {/* Stats */}
-          <div className="p-6 bg-card">
-            <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="p-4 bg-card">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Completed</p>
-                <p className="text-lg font-semibold text-foreground">
+                <p className="text-xs text-muted-foreground mb-1 text-center flex items-center justify-center gap-1">
+                  {" "}
+                  <BadgeCheck className="w-4 h-4 text-green-500" /> Completed
+                </p>
+                <p className="text-lg font-semibold text-foreground text-center">
                   {stats.testsCompleted}
                   <span className="text-xs text-muted-foreground font-normal">
                     /{totalTests}
@@ -154,13 +159,18 @@ function TestCard({
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Avg Score</p>
-                <div className="flex items-center gap-1">
-                  <Target className="w-3 h-3 text-accent" />
-                  <p className="text-lg font-semibold text-foreground">{stats.avgScore}</p>
-                </div>
+                <p className="text-xs text-muted-foreground mb-1 text-center flex items-center justify-center gap-1">
+                  {" "}
+                  <Target className="w-4 h-4 text-accent" /> Avg Score
+                </p>
+                {/* <div className="flex items-center gap-1"> */}
+                {/* <Target className="w-3 h-3 text-accent" /> */}
+                <p className="text-lg font-semibold text-foreground text-center">
+                  {stats.avgScore}
+                </p>
+                {/* </div> */}
               </div>
-              <div>
+              {/* <div>
                 <p className="text-xs text-muted-foreground mb-1">Improvement</p>
                 <div className="flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-emerald-500" />
@@ -168,29 +178,36 @@ function TestCard({
                     +{stats.improvement}
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Progress Bar */}
             <div className="mb-4">
               <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                 <motion.div
-                  className={cn("h-full rounded-full", color.replace("text-", "bg-"))}
+                  className={cn(
+                    "h-full rounded-full",
+                    color.replace("text-", "bg-"),
+                  )}
                   initial={{ width: 0 }}
-                  animate={{ width: `${(stats.testsCompleted / totalTests) * 100}%` }}
+                  animate={{
+                    width: `${(stats.testsCompleted / totalTests) * 100}%`,
+                  }}
                   transition={{ duration: 1, delay: 0.3 }}
                 />
               </div>
             </div>
 
             {/* CTA */}
-            <Button
-              className="w-full group/btn"
-              variant="outline"
-            >
-              <span>Start Practice</span>
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
-            </Button>
+            <Link href={href}>
+              <Button
+                className="w-full group/btn hover:text-white"
+                variant="outline"
+              >
+                <span>Start Practice</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

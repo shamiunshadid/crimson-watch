@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ const mainNavItems = [
 ];
 
 const secondaryNavItems = [
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/stats", label: "Stats", icon: BarChart3 },
   { href: "/dashboard/profile", label: "Profile", icon: User },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/help", label: "Help & Support", icon: HelpCircle },
@@ -63,9 +63,9 @@ export function Sidebar() {
       {/* Main Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         <div className="mb-4">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
+          {/* <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
             Main Menu
-          </p>
+          </p> */}
           {mainNavItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -75,9 +75,8 @@ export function Sidebar() {
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                   )}
-                  whileHover={{ x: isActive ? 0 : 4 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <item.icon className="w-4 h-4" />
@@ -95,9 +94,9 @@ export function Sidebar() {
         </div>
 
         <div className="pt-4 border-t border-border/50">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
+          {/* <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
             Account
-          </p>
+          </p> */}
           {secondaryNavItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -107,9 +106,8 @@ export function Sidebar() {
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                   )}
-                  whileHover={{ x: isActive ? 0 : 4 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <item.icon className="w-4 h-4" />
@@ -123,22 +121,26 @@ export function Sidebar() {
 
       {/* User Profile & Logout */}
       <div className="p-4 border-t border-border/50">
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 mb-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center">
-            <span className="text-sm font-semibold text-accent-foreground">JD</span>
+          <div className="flex items-center gap-3 p-3 rounded-lg  mb-3">
+            <div className="w-9 h-9 rounded-full bg-linear-to-br from-accent to-accent/70 flex items-center justify-center">
+              <span className="text-sm font-semibold text-accent-foreground">
+                JD
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                John Doe
+              </p>
+              {/* <p className="text-xs text-muted-foreground truncate">john@example.com</p> */}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">John Doe</p>
-            <p className="text-xs text-muted-foreground truncate">john@example.com</p>
-          </div>
-        </div>
-        <Button
+        {/* <Button
           variant="ghost"
           className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-secondary"
         >
           <LogOut className="w-4 h-4 mr-3" />
           Sign Out
-        </Button>
+        </Button> */}
       </div>
     </motion.aside>
   );

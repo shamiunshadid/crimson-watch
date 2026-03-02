@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,7 +101,7 @@ export function AIAssistant({ isOpen, onToggle }: AIAssistantProps) {
               onClick={onToggle}
               className="w-14 h-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 group"
             >
-              <Bot className="w-6 h-6 text-primary-foreground group-hover:scale-110 transition-transform" />
+              <Bot className="size-6  text-primary-foreground group-hover:scale-110 transition-transform" />
             </Button>
           </motion.div>
         )}
