@@ -23,7 +23,7 @@ export const sessions = pgTable("sessions", {
 });
 
 export const userStats = pgTable("user_stats", {
-    id: uuid().primaryKey().defaultRandom(),
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer().references(()=> users.id, {onDelete: "cascade"}).unique().notNull(),
 
     // reading tests stats
@@ -61,4 +61,20 @@ export const readingTests = pgTable("reading_tests", {
     deletedAt: timestamp().defaultNow().notNull(),
 
     publishedAt: timestamp(),
+});
+
+
+export const readingSections = pgTable("reading_sections", {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    testId: integer().references(()=> readingTests.id).notNull(),
+
+    title: varchar({length: 255}).notNull(),
+    sectionNumber: integer().notNull(),
+    passage: text().notNull(),
+    
+    totalQuestions: integer().notNull(),
+    description: text(),
+
+    createdAt: timestamp().defaultNow().notNull(),
+    updatedAt: timestamp().defaultNow().notNull(),
 });
