@@ -1,4 +1,5 @@
-import { integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {v7 as uuidv7} from "uuid"
 
 export const users = pgTable("users", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -36,4 +37,28 @@ export const userStats = pgTable("user_stats", {
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
     deletedAt: timestamp().defaultNow().notNull(),
+});
+
+export const readingTests = pgTable("reading_tests", {
+    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
+    title: varchar({length: 255}).notNull(),
+    slug: varchar({length: 255}).notNull(),
+    description: text(),
+
+    passage: text().notNull(),
+    difficulty: varchar({length: 20}).notNull(),
+    testType: varchar({length: 50}).default("academic").notNull(),
+    
+    timeAllowed: integer().notNull(),
+    totalQuestions: integer().notNull(),
+    totalSections: integer().default(0).notNull(),
+
+    isPublished: boolean().default(false).notNull(),
+    orderIndex: integer().default(0),
+
+    createdAt: timestamp().defaultNow().notNull(),
+    updatedAt: timestamp().defaultNow().notNull(),
+    deletedAt: timestamp().defaultNow().notNull(),
+
+    publishedAt: timestamp(),
 });
