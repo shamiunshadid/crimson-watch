@@ -1,140 +1,136 @@
 import { boolean, decimal, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import {v7 as uuidv7} from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
 export const users = pgTable("users", {
-    // id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
-    fullName: varchar({length: 255}).notNull(),
-    email: varchar({length: 255}).notNull().unique(),
-    password: varchar({length: 255}).notNull(),
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
-    deletedAt: timestamp(),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
+    fullName: varchar("full_name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    password: varchar("password", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
 });
 
 export const sessions = pgTable("sessions", {
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
-    userId: uuid().notNull().references(()=> users.id, {onDelete: "cascade"}),
-    sessionToken: text().notNull().unique(),
-    userAgent: text(),
-    ip: varchar({length: 45}).notNull(),
-    expiresAt: timestamp().notNull(),
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
+    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    sessionToken: text("session_token").notNull().unique(),
+    userAgent: text("user_agent"),
+    ip: varchar("ip", { length: 45 }).notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const userStats = pgTable("user_stats", {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    userId: uuid().references(()=> users.id, {onDelete: "cascade"}).unique().notNull(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).unique().notNull(),
 
     // reading tests stats
-    readingTestTaken: integer().default(0).notNull(),
-    readingAvarageScore: integer().default(0).notNull(),
-    readingImprovement: integer().default(0).notNull(),
-    readingTotalTime: integer().default(0).notNull(),
+    readingTestTaken: integer("reading_test_taken").default(0).notNull(),
+    readingAvarageScore: integer("reading_average_score").default(0).notNull(),
+    readingImprovement: integer("reading_improvement").default(0).notNull(),
+    readingTotalTime: integer("reading_total_time").default(0).notNull(),
 
-    // other tests stats
-
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
-    deletedAt: timestamp()
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at")
 });
 
 export const readingTests = pgTable("reading_tests", {
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
-    title: varchar({length: 255}).notNull(),
-    slug: varchar({length: 255}).notNull(),
-    description: text(),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    description: text("description"),
 
-    passage: text().notNull(),
-    difficulty: varchar({length: 20}).notNull(),
-    testType: varchar({length: 50}).default("academic").notNull(),
+    passage: text("passage").notNull(),
+    difficulty: varchar("difficulty", { length: 20 }).notNull(),
+    testType: varchar("test_type", { length: 50 }).default("academic").notNull(),
     
-    timeAllowed: integer().notNull(),
-    totalQuestions: integer().notNull(),
-    totalSections: integer().default(0).notNull(),
+    timeAllowed: integer("time_allowed").notNull(),
+    totalQuestions: integer("total_questions").notNull(),
+    totalSections: integer("total_sections").default(0).notNull(),
 
-    isPublished: boolean().default(false).notNull(),
-    orderIndex: integer().default(0),
+    isPublished: boolean("is_published").default(false).notNull(),
+    orderIndex: integer("order_index").default(0),
 
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
-    deletedAt: timestamp(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
 
-    publishedAt: timestamp(),
+    publishedAt: timestamp("published_at"),
 });
 
 
 export const readingSections = pgTable("reading_sections", {
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
-    testId: uuid().references(()=> readingTests.id, {onDelete: "cascade"}).notNull(),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
+    testId: uuid("test_id").references(() => readingTests.id, { onDelete: "cascade" }).notNull(),
 
-    title: varchar({length: 255}).notNull(),
-    sectionNumber: integer().notNull(),
-    passage: text().notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    sectionNumber: integer("section_number").notNull(),
+    passage: text("passage").notNull(),
     
-    totalQuestions: integer().notNull(),
-    description: text(),
+    totalQuestions: integer("total_questions").notNull(),
+    description: text("description"),
 
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const readingQuestions = pgTable("reading_questions", {
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
-    sectionId: uuid().references(()=> readingSections.id, {onDelete: "cascade"}).notNull(),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
+    sectionId: uuid("section_id").references(() => readingSections.id, { onDelete: "cascade" }).notNull(),
 
-    questionText: text().notNull(),
-    questionType: varchar({length: 50}).notNull(),
+    questionText: text("question_text").notNull(),
+    questionType: varchar("question_type", { length: 50 }).notNull(),
 
-    options: jsonb(),
+    options: jsonb("options"),
 
-    correctAnswer: text().notNull(),
-    explanation: text(),
+    correctAnswer: text("correct_answer").notNull(),
+    explanation: text("explanation"),
 
-    questionNumber: integer().notNull(),
-    points: integer().default(1).notNull(),
+    questionNumber: integer("question_number").notNull(),
+    points: integer("points").default(1).notNull(),
 
-    metadata: jsonb(),
+    metadata: jsonb("metadata"),
 
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const testAttempts = pgTable("test_attempts", {
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
-    userId: uuid().references(()=> users.id).notNull(),
-    testId: uuid().references(()=> readingTests.id).notNull(),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
+    userId: uuid("user_id").references(() => users.id).notNull(),
+    testId: uuid("test_id").references(() => readingTests.id).notNull(),
     
-    status: varchar({length: 20}).default("in_progress").notNull(),
+    status: varchar("status", { length: 20 }).default("in_progress").notNull(),
 
-    startedAt: timestamp().defaultNow().notNull(),
-    completedAt: timestamp(),
-    timeSpent: integer(),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    completedAt: timestamp("completed_at"),
+    timeSpent: integer("time_spent"),
 
-    score: integer(),
-    percentageScore: decimal({ precision: 5, scale: 2 }),
-    bandScore: decimal({ precision: 3, scale: 1 }),
+    score: integer("score"),
+    percentageScore: decimal("percentage_score", { precision: 5, scale: 2 }),
+    bandScore: decimal("band_score", { precision: 3, scale: 1 }),
 
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const questionResponses = pgTable("question_responses", {
-    id: uuid().primaryKey().$defaultFn(()=> uuidv7()),
+    id: uuid("id").primaryKey().$defaultFn(() => uuidv7()),
 
-    attemptId: uuid().references(()=> testAttempts.id).notNull(),
-    questionId: uuid().references(()=> readingQuestions.id).notNull(),
+    attemptId: uuid("attempt_id").references(() => testAttempts.id).notNull(),
+    questionId: uuid("question_id").references(() => readingQuestions.id).notNull(),
 
-    userAnswer: text().notNull(),
-    isCorrect: boolean().default(false),
+    userAnswer: text("user_answer").notNull(),
+    isCorrect: boolean("is_correct").default(false),
 
-    timeSpent: integer(), 
-    isFlagged: boolean().default(false),
+    timeSpent: integer("time_spent"), 
+    isFlagged: boolean("is_flagged").default(false),
 
+    isSubmitted: boolean("is_submitted").default(false).notNull(), 
 
-    isSubmitted: boolean().default(false).notNull(), 
-
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
