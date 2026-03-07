@@ -1,19 +1,38 @@
 import { db } from "@/db";
-import { sessions } from "@/db/schema";
+import { sessions, users, } from "@/db/schema";
 import crypto from "crypto"
 import { cookies, headers } from "next/headers";
 import { getIpAdress } from "./location";
+import { eq } from "drizzle-orm";
 
 
 
 interface CreateSessionData {
-    userId: number,
+    userId: string,
     sessionToken: string,
     userAgent: string,
     ip: string
 }
 
+export type UserWithSession = {
+  id: number;
+  fullName: string;
+  email: string;
+  session: {
+    id: number; // Changed to number since your sessions.id is integer
+    expiresAt: Date;
+    userAgent: string | null;
+    ip: string | null;
+  };
+};
+
+// const sessionLifeTime = process.env.SESSION_LIFETIME;  //days
+// const sessionName = process.env.SESSION_NAME;
+// const sessionRefreshTime = process.env.SESSION_REFRESH_TIME;  //days
+
 const SESSION_LIFETIME = 30;
+const SESSION_NAME = "session";
+const SESSION_REFRESH_TIME = 15;
 
 // generate a random token
 const generateRandomSessionToken = ()=>{
@@ -48,7 +67,7 @@ export const createNewSession = async({userId, sessionToken, userAgent, ip}: Cre
 
 
 // set session to cookies
-export const setSessionToCookies = async(userId: number)=>{
+export const setSessionToCookies = async(userId: string)=>{
     const cookieStore = await cookies();
 
     const token = generateRandomSessionToken();
@@ -62,10 +81,110 @@ export const setSessionToCookies = async(userId: number)=>{
         userAgent: headerList.get("user-agent") || ""
     });
 
-    cookieStore.set("session", token, {
+    cookieStore.set(SESSION_NAME, token, {
         secure: true,
         httpOnly: true,
         sameSite: "lax",
         maxAge: SESSION_LIFETIME
     });
+}
+
+
+// Get the current user
+export const getCurrentUsers = async()=>{
+    try {
+        const cookieStore = await cookies();
+        const rawToken = cookieStore.get(SESSION_NAME)?.value;
+
+        if(!rawToken) {
+            return null;
+        };
+
+        // hasded token to search in the database
+        const hashedToken = crypto.createHash("sha-256").update(rawToken).digest("hex");
+
+        const session = await db.select({
+            id: users.id,
+            fullName: users.fullName,
+            email: users.email,
+
+            // Session fields
+            sessionId: sessions.id,
+            sessionExpiresAt: sessions.expiresAt,
+            sessionUserAgent: sessions.userAgent,
+            sessionIp: sessions.ip,
+        })
+        .from(sessions)
+        .where(eq(sessions.sessionToken, hashedToken))
+        .innerJoin(users, eq(users.id, sessions.userId))
+        .limit(1);
+
+        if(!session){
+            return null;
+        };
+
+        const result = session[0];
+
+        const currentTime = Date.now();
+        const sessionExpirsAt = result.sessionExpiresAt.getTime();
+
+        // check for session expired or not!!
+        if(currentTime >= sessionExpirsAt){
+            await db.delete(sessions).where(eq(sessions.id, result.sessionId))
+            return null;
+        }
+
+
+        const refreshThreshold = sessionExpirsAt - (SESSION_REFRESH_TIME * 1000);
+
+        if(currentTime >= refreshThreshold){
+            await db.update(sessions).set({expiresAt: new Date(Date.now() + (SESSION_LIFETIME * 1000)),
+                updatedAt: new Date(),
+            }).where(eq(sessions.id, result.sessionId))
+        }
+
+
+        return {
+            id: result.id,
+            fullName: result.fullName,
+            email: result.email,
+            session: {
+                id: result.sessionId,
+                expiresAt: result.sessionExpiresAt,
+                userAgent: result.sessionUserAgent,
+                ip: result.sessionIp,
+            }
+        };
+
+    } catch (error) {
+        console.error("Error getting current user", error);
+        return null;
+    }
+}
+
+
+
+
+// For logout
+export const deleteSession = async()=>{
+    try {
+        const cookieStore = await cookies();
+        const rawToken = cookieStore.get(SESSION_NAME)?.value;
+
+        if(rawToken){
+            const hashedToken = crypto.createHash("sha-256").update(rawToken).digest("hex");
+
+            await db.delete(sessions).where(eq(sessions.sessionToken, hashedToken))
+        }
+
+        cookieStore.delete(SESSION_NAME);
+
+        return {
+            success: true
+        };
+
+
+    } catch (error) {
+        console.error("Error deleting sessions ",error)
+    }
 }
