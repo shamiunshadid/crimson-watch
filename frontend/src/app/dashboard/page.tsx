@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { Sidebar } from "./_components/Sidebar";
+// import { Sidebar } from "./_components/Sidebar";
 import { DashboardHeader } from "./_components/Dashboard-header";
 import { TestCards } from "./_components/Test-cards";
 import { StatsSection } from "./_components/Stats-section";
@@ -14,8 +14,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar />
 
       {/* Main Content */}
       <main
