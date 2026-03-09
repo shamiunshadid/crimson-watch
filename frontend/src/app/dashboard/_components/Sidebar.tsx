@@ -14,10 +14,23 @@ import {
   Settings,
   User,
   HelpCircle,
-  LogOut,
   GraduationCap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+
+// Define the user type (match your schema)
+interface User {
+  id: string
+  fullName: string
+  email: string
+  // add other fields as needed
+}
+
+// Define props
+interface SidebarProps {
+  user: User
+}
+
 
 const mainNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -34,8 +47,21 @@ const secondaryNavItems = [
   { href: "/dashboard/help", label: "Help & Support", icon: HelpCircle },
 ];
 
-export function Sidebar() {
+
+// Get initials from full name
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+
+export function Sidebar({user}: SidebarProps) {
   const pathname = usePathname();
+  const initials = getInitials(user.fullName)
 
   return (
     <motion.aside
@@ -119,28 +145,26 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* User Profile & Logout */}
+      {/* User Profile - NOW WITH REAL DATA */}
       <div className="p-4 border-t border-border/50">
-          <div className="flex items-center gap-3 p-3 rounded-lg  mb-3">
-            <div className="w-9 h-9 rounded-full bg-linear-to-br from-accent to-accent/70 flex items-center justify-center">
-              <span className="text-sm font-semibold text-accent-foreground">
-                JD
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                John Doe
-              </p>
-              {/* <p className="text-xs text-muted-foreground truncate">john@example.com</p> */}
-            </div>
-          </div>
-        {/* <Button
-          variant="ghost"
-          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-secondary"
+        <motion.div
+          className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 mb-3"
+          whileHover={{ backgroundColor: "rgba(var(--secondary), 0.5)" }}
         >
-          <LogOut className="w-4 h-4 mr-3" />
-          Sign Out
-        </Button> */}
+          <div className="w-9 h-9 rounded-full bg-linear-to-br from-accent to-accent/70 flex items-center justify-center">
+            <span className="text-sm font-semibold text-accent-foreground">
+              {initials || ""}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">
+              {user.fullName || ""}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user.email || ""}
+            </p>
+          </div>
+        </motion.div>
       </div>
     </motion.aside>
   );
