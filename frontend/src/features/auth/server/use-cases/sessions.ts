@@ -82,7 +82,7 @@ export const setSessionToCookies = async(userId: string)=>{
     });
 
     cookieStore.set(SESSION_NAME, token, {
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         sameSite: "lax",
         maxAge: SESSION_LIFETIME
@@ -163,6 +163,65 @@ export const getCurrentUsers = async()=>{
 }
 
 
+// For middleware
+export const validateSession = async () => {
+  try {
+    const cookieStore = await cookies();
+    const rawToken = cookieStore.get(SESSION_NAME)?.value;
+    console.log("Raw token", rawToken);
+    
+    if (!rawToken) {
+    console.log('❌ No session cookie found')
+      return { isValid: false, user: null };
+    }
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.sessionToken, hashedToken))
+      .limit(1);
+
+    console.log('Session found:', session ? 'Yes' : 'No')
+
+    if (!session || session.expiresAt <= new Date()) {
+        console.log('❌ Session not found in database')
+      cookieStore.delete(SESSION_NAME);
+      return { isValid: false, user: null };
+    }
+
+    // Get the user associated with this session
+    const [user] = await db
+      .select({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, session.userId))
+      .limit(1);
+
+    if (!user) {
+      // User doesn't exist anymore, clean up session
+      await db.delete(sessions).where(eq(sessions.id, session.id));
+      cookieStore.delete(SESSION_NAME);
+      return { isValid: false, user: null };
+    }
+
+    return {
+      isValid: true,
+      user: session,
+      sessionId: session.id,
+    };
+  } catch (error) {
+    console.error("Error validating session:", error);
+    return { isValid: false, user: null };
+  }
+};
 
 
 // For logout
