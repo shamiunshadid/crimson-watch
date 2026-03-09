@@ -28,7 +28,7 @@ export const userStats = pgTable("user_stats", {
 
     // reading tests stats
     readingTestTaken: integer("reading_test_taken").default(0).notNull(),
-    readingAvarageScore: integer("reading_average_score").default(0).notNull(),
+    readingAverageScore: integer("reading_average_score").default(0).notNull(),
     readingImprovement: integer("reading_improvement").default(0).notNull(),
     readingTotalTime: integer("reading_total_time").default(0).notNull(),
 
