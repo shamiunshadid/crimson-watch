@@ -6,25 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
   ArrowRight,
   GraduationCap,
   BookOpen,
   CheckCircle2,
-  User
+  User,
 } from "lucide-react";
 import Link from "next/link";
 
-import {useForm} from "react-hook-form"
-import { registrationAction } from "./action";
-import {RegisterUserData, registerUserSchema} from "@/features/auth/auth.schema"
+import { useForm } from "react-hook-form";
+import {
+  RegisterUserData,
+  registerUserSchema,
+} from "@/features/auth/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import { authClient } from "@/features/auth/client";
 
 // Animation variants
 const containerVariants: Variants = {
@@ -74,55 +77,61 @@ const scaleInVariants: Variants = {
   },
 };
 
-
-
 const features = [
   "Real exam simulations",
   "AI-powered feedback",
-  "Progress tracking"
+  "Progress tracking",
 ];
 
-
 export default function SignUpPage() {
-  
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
-    register, 
-    handleSubmit, 
-    formState: {errors}
+    register,
+    handleSubmit,
+    formState: { errors },
   } = useForm({
     //        This one is real function (registerUserSchema)
-    resolver: zodResolver(registerUserSchema)
+    resolver: zodResolver(registerUserSchema),
   });
 
-  const router = useRouter();
-
-
-
   //                   This one is type (RegisterUserData)
-  const onSubmit = async (data: RegisterUserData  )=>{
+  const onSubmit = async (submitData: RegisterUserData) => {
+    const { data, error } = await authClient.signUp.email(
+      {
+        name: submitData.name,
+        email: submitData.email,
+        password: submitData.password,
+        callbackURL: "/dashboard",
+      },
+      {
+        onRequest: (ctx) => {
+          setIsLoading(true);
+        },
+        onSuccess: (ctx) => {
+          setIsLoading(false);
+          toast.success("Account created successfully!");
+          redirect("/dashboard");
+        },
+        onError: (ctx) => {
+          setIsLoading(false);
+          toast.error(ctx.error.message);
+        },
+      },
+    );
 
-    const result = await registrationAction(data);
-
-    
-    if (result.status === "SUCCESS") {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
+    // Fallback error handling if callbacks don't execute
+    if (error) {
+      setIsLoading(false);
+      toast.error(error.message || "An error occurred during sign up");
     }
-    
-    if(result.status === "SUCCESS"){
-      router.push("/dashboard")
-    }
-  }
-
-
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-background">
       {/* Left Side - Branding */}
-      <motion.div 
+      <motion.div
         className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/10"
         initial="hidden"
         animate="visible"
@@ -130,25 +139,25 @@ export default function SignUpPage() {
       >
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <motion.div 
+          <motion.div
             className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-accent/20 blur-3xl"
-            animate={{ 
+            animate={{
               scale: [1, 1.1, 1],
               opacity: [0.3, 0.5, 0.3],
             }}
-            transition={{ 
+            transition={{
               duration: 8,
               repeat: Infinity,
               ease: "easeInOut",
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-primary/10 blur-3xl"
-            animate={{ 
+            animate={{
               scale: [1, 1.15, 1],
               opacity: [0.2, 0.4, 0.2],
             }}
-            transition={{ 
+            transition={{
               duration: 10,
               repeat: Infinity,
               ease: "easeInOut",
@@ -166,7 +175,7 @@ export default function SignUpPage() {
           >
             {/* Logo */}
             <div className="flex items-center gap-3 mb-8">
-              <motion.div 
+              <motion.div
                 className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg"
                 whileHover={{ scale: 1.05, rotate: 2 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -185,7 +194,8 @@ export default function SignUpPage() {
             </h1>
 
             <p className="text-lg text-muted-foreground mb-10 max-w-md leading-relaxed">
-              Practice with confidence. Our premium mock tests prepare you for success in reading, writing, speaking, and listening.
+              Practice with confidence. Our premium mock tests prepare you for
+              success in reading, writing, speaking, and listening.
             </p>
 
             {/* Features */}
@@ -208,12 +218,12 @@ export default function SignUpPage() {
           </motion.div>
 
           {/* Decorative book icon */}
-          <motion.div 
+          <motion.div
             className="absolute bottom-20 right-20 opacity-10"
-            animate={{ 
+            animate={{
               rotate: [0, 5, 0, -5, 0],
             }}
-            transition={{ 
+            transition={{
               duration: 6,
               repeat: Infinity,
               ease: "easeInOut",
@@ -225,29 +235,28 @@ export default function SignUpPage() {
       </motion.div>
 
       {/* Right Side - Sign Up Form */}
-      <motion.div 
+      <motion.div
         className="flex-1 flex items-center justify-center p-6 lg:p-12"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <motion.div 
-          className="w-full max-w-md"
-          variants={scaleInVariants}
-        >
+        <motion.div className="w-full max-w-md" variants={scaleInVariants}>
           {/* Mobile Logo */}
-          <motion.div 
+          <motion.div
             className="lg:hidden flex items-center justify-center gap-3 mb-8"
             variants={itemVariants}
           >
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
               <GraduationCap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-semibold text-foreground">IELTS Master</span>
+            <span className="text-xl font-semibold text-foreground">
+              IELTS Master
+            </span>
           </motion.div>
 
           {/* Form Card */}
-          <motion.form 
+          <motion.form
             className="bg-card rounded-2xl border border-border/50 p-8 card-shadow"
             variants={itemVariants}
             onSubmit={handleSubmit(onSubmit)}
@@ -263,35 +272,39 @@ export default function SignUpPage() {
             </motion.div>
 
             {/* Form */}
-            <motion.div 
-              className="space-y-5" 
-              variants={containerVariants} 
-            >
+            <motion.div className="space-y-5" variants={containerVariants}>
               {/* Name Field */}
               <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="name"
+                  className="text-sm font-medium text-foreground"
+                >
                   Full name
                 </Label>
                 <div className="relative group">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                   <Input
-                    id="fullName"
+                    id="name"
                     type="text"
                     placeholder="John Doe"
-                    required
-                    {...register("fullName")}
+                    {...register("name")}
                     className="pl-10 h-11 rounded-lg border-border/60 bg-background transition-all duration-200 hover:border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
                 <div>
-                  {errors && <p className="text-sm text-destructive">
-                    {errors.fullName?.message}
-                </p>}
+                  {errors && (
+                    <p className="text-sm text-destructive">
+                      {errors.name?.message}
+                    </p>
+                  )}
                 </div>
               </motion.div>
               {/* Email Field */}
               <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-foreground"
+                >
                   Email address
                 </Label>
                 <div className="relative group">
@@ -306,15 +319,20 @@ export default function SignUpPage() {
                   />
                 </div>
                 <div>
-                  {errors && <p className="text-sm text-destructive">
-                    {errors.email?.message}
-                </p>}
+                  {errors && (
+                    <p className="text-sm text-destructive">
+                      {errors.email?.message}
+                    </p>
+                  )}
                 </div>
               </motion.div>
 
               {/* Password Field */}
               <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-foreground"
+                >
                   Password
                 </Label>
                 <div className="relative group">
@@ -340,18 +358,24 @@ export default function SignUpPage() {
                   </button>
                 </div>
                 <div>
-                  {errors && <p className="text-sm text-destructive">
-                    {errors.password?.message}
-                </p>}
+                  {errors && (
+                    <p className="text-sm text-destructive">
+                      {errors.password?.message}
+                    </p>
+                  )}
                 </div>
               </motion.div>
 
               {/* Sign Up Button */}
               <motion.div variants={itemVariants}>
                 <Button
-                  className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md active:scale-[0.98] group cursor-pointer"
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md active:scale-[0.98] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span>Create account</span>
+                  <span>
+                    {isLoading ? "Creating account..." : "Create account"}
+                  </span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
               </motion.div>
@@ -366,7 +390,10 @@ export default function SignUpPage() {
             </motion.div>
 
             {/* Social Buttons */}
-            <motion.div className="grid grid-cols-2 gap-3" variants={itemVariants}>
+            <motion.div
+              className="grid grid-cols-2 gap-3"
+              variants={itemVariants}
+            >
               {/* Google Button */}
               <motion.button
                 type="button"
@@ -391,10 +418,7 @@ export default function SignUpPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                <motion.span
-                >
-                  Google
-                </motion.span>
+                <motion.span>Google</motion.span>
               </motion.button>
 
               {/* LinkedIn Button */}
@@ -403,24 +427,25 @@ export default function SignUpPage() {
                 className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background font-medium text-sm text-foreground transition-all duration-200 hover:bg-secondary hover:border-border hover:shadow-sm active:scale-[0.98] cursor-pointer"
                 whileTap={{ scale: 0.99 }}
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-                <motion.span
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                 >
-                  LinkedIn
-                </motion.span>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+                <motion.span>LinkedIn</motion.span>
               </motion.button>
             </motion.div>
 
             {/* Sign In Link */}
-            <motion.p 
+            <motion.p
               className="text-center text-sm text-muted-foreground mt-6"
               variants={itemVariants}
             >
               Already have an account?{" "}
-              <Link 
-                href="/sign-in" 
+              <Link
+                href="/sign-in"
                 className="text-foreground font-medium hover:text-accent transition-colors underline-offset-4 hover:underline"
               >
                 Sign in
@@ -429,16 +454,22 @@ export default function SignUpPage() {
           </motion.form>
 
           {/* Terms */}
-          <motion.p 
+          <motion.p
             className="text-center text-xs text-muted-foreground mt-6 px-4"
             variants={itemVariants}
           >
             By creating an account, you agree to our{" "}
-            <a href="#" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            <a
+              href="#"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            <a
+              href="#"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
               Privacy Policy
             </a>
           </motion.p>
