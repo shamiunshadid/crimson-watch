@@ -18,10 +18,10 @@ import {
 import Link from "next/link";
 import {useForm} from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signInAction } from "./action";
 import { SignInUserData, signInUserSchema } from "@/features/auth/auth.schema";
-import { useRouter } from "next/navigation";
+import { redirect, } from "next/navigation";
 import { toast } from "sonner";
+import { authClient } from "@/features/auth/client";
 
 
 // Animation variants
@@ -72,41 +72,58 @@ const scaleInVariants: Variants = {
   },
 };
 
+const stats = [
+  { value: "50K+", label: "Students" },
+  { value: "4.9", label: "Rating" },
+  { value: "100+", label: "Mock Tests" },
+];
+
+
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
-    register, 
+    register,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm({
-    resolver: zodResolver(signInUserSchema)
+    resolver: zodResolver(signInUserSchema),
   });
 
+  const onSubmit = async (submitData: SignInUserData) => {
+    const { error } = await authClient.signIn.email(
+      {
+        email: submitData.email,
+        password: submitData.password,
+        callbackURL: "/dashboard",
+      },
+      {
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onSuccess: () => {
+          setIsLoading(false);
+          toast.success("Sign up successfully!");
+          redirect("/dashboard");
+        },
+        onError: (ctx) => {
+          setIsLoading(false);
+          toast.error(ctx.error.message);
+        },
+      },
+    );
 
-  const router = useRouter();
+    // Fallback error handling if callbacks don't execute
+      if (error) {
+        setIsLoading(false);
+        toast.error(error.message || "An error occurred during sign in");
+      }
 
-  const onSubmit = async(data: SignInUserData)=>{
-    const result = await signInAction(data);
-
-    if (result.status === "SUCCESS") {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-    
-    if(result.status === "SUCCESS"){
-      router.push("/dashboard")
-    }
-    
-  }
+  };
 
 
-  const stats = [
-    { value: "50K+", label: "Students" },
-    { value: "4.9", label: "Rating" },
-    { value: "100+", label: "Mock Tests" },
-  ];
+
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-background">
@@ -239,9 +256,10 @@ export default function SignInPage() {
               <motion.div variants={itemVariants}>
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md active:scale-[0.98] group cursor-pointer"
                 >
-                  <span>Sign in</span>
+                  <span>{isLoading ? "Signing in..." : "Sign in"}</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
               </motion.div>
