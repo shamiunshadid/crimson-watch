@@ -17,9 +17,13 @@ import {
   Star,
   Search,
   Bell,
+  Loader2,
 } from "lucide-react";
-import { Sidebar } from "../_components/Sidebar";
 import { cn } from "@/lib/utils";
+
+import { useQuery } from "@tanstack/react-query";
+import { getUserReadingData } from "./action";
+
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -44,120 +48,43 @@ const itemVariants: Variants = {
   },
 };
 
-const recentTests = [
-  {
-    id: 1,
-    title: "Academic Reading Test 5",
-    date: "2 days ago",
-    score: 7.0,
-    totalQuestions: 40,
-    correctAnswers: 32,
-    duration: "58 min",
-  },
-  {
-    id: 2,
-    title: "Academic Reading Test 4",
-    date: "5 days ago",
-    score: 6.5,
-    totalQuestions: 40,
-    correctAnswers: 28,
-    duration: "55 min",
-  },
-  {
-    id: 3,
-    title: "Academic Reading Test 3",
-    date: "1 week ago",
-    score: 6.0,
-    totalQuestions: 40,
-    correctAnswers: 25,
-    duration: "60 min",
-  },
-];
-
-const availableTests = [
-  {
-    id: 1,
-    title: "Academic Reading Test 1",
-    difficulty: "Easy",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-    bestScore: 7.0,
-  },
-  {
-    id: 2,
-    title: "Academic Reading Test 2",
-    difficulty: "Medium",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-  },
-  {
-    id: 3,
-    title: "Academic Reading Test 3",
-    difficulty: "Hard",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-  },
-  {
-    id: 4,
-    title: "Academic Reading Test 4",
-    difficulty: "Hard",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-  },
-];
-
-const alreadyTakenTests = [
-  {
-    id: 1,
-    title: "Academic Reading Test 1",
-    difficulty: "Medium",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-    completed: true,
-    bestScore: 7.0,
-  },
-  {
-    id: 2,
-    title: "Academic Reading Test 2",
-    difficulty: "Medium",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-    completed: true,
-    bestScore: 6.5,
-  },
-  {
-    id: 3,
-    title: "Academic Reading Test 3",
-    difficulty: "Hard",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-    completed: true,
-    bestScore: 6.0,
-  },
-  {
-    id: 4,
-    title: "Academic Reading Test 4",
-    difficulty: "Hard",
-    passages: 3,
-    questions: 40,
-    duration: "60 min",
-    completed: true,
-    bestScore: 6.5,
-  },
-];
+// Removed hardcoded test entries since they will be dynamically fetched now
 
 export default function ReadingPage() {
+  const { data: readingData, isLoading } = useQuery({
+    queryKey: ["userReadingData"],
+    queryFn: () => getUserReadingData(),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center ml-64">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+      </div>
+    );
+  }
+
+  const { stats, availableTests, alreadyTakenTests, recentTests } = readingData?.data || {
+    stats: {
+      readingTestTaken: 0,
+      readingAverageScore: 0,
+      readingImprovement: 0,
+      readingTotalTime: 0,
+    },
+    availableTests: [],
+    alreadyTakenTests: [],
+    recentTests: [],
+  };
+
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-
       <div
         className={cn(
           "transition-all duration-300 min-h-screen",
@@ -230,7 +157,7 @@ export default function ReadingPage() {
                         <p className="text-xs text-muted-foreground">
                           Tests Taken
                         </p>
-                        <p className="text-xl font-semibold">12</p>
+                        <p className="text-xl font-semibold">{stats.readingTestTaken}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -245,7 +172,7 @@ export default function ReadingPage() {
                         <p className="text-xs text-muted-foreground">
                           Avg Score
                         </p>
-                        <p className="text-xl font-semibold">7.0</p>
+                        <p className="text-xl font-semibold">{stats.readingAverageScore}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -261,7 +188,7 @@ export default function ReadingPage() {
                           Improvement
                         </p>
                         <p className="text-xl font-semibold text-emerald-600">
-                          +0.5
+                          +{stats.readingImprovement}
                         </p>
                       </div>
                     </div>
@@ -277,7 +204,7 @@ export default function ReadingPage() {
                         <p className="text-xs text-muted-foreground">
                           Total Time
                         </p>
-                        <p className="text-xl font-semibold">8h 24m</p>
+                        <p className="text-xl font-semibold">{formatTime(stats.readingTotalTime)}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -322,7 +249,8 @@ export default function ReadingPage() {
                                     ? "destructive"
                                     : "secondary"
                                 }
-                                className="text-xs"
+                                // className="text-xs"
+                                className={`text-xs ${test.difficulty === "Easy" ? "bg-green-300 text-neutral-900" : ""} ${test.difficulty === "Medium" ? "bg-orange-300 text-neutral-900" : ""}`}
                               >
                                 {test.difficulty}
                               </Badge>
@@ -352,7 +280,7 @@ export default function ReadingPage() {
                         </div>
 
                           {/* Here I need to put a real link */}
-                        <Link href={`/dashboard/reading/test/something`}>
+                        <Link href={`/dashboard/reading/test/${test.slug}`}>
                           <Button className="w-full">
                             Start Test
                             <ChevronRight className="w-4 h-4 ml-1" />
@@ -440,7 +368,7 @@ export default function ReadingPage() {
                         </div>
 
                           {/* Here also need to put real link which will come from db */}
-                        <Link href={`/dashboard/reading/test/something`}>
+                        <Link href={`/dashboard/reading/test/${test.slug}`}>
                           <Button
                             className="w-full hover:text-white"
                             variant={"outline"}
@@ -553,7 +481,7 @@ export default function ReadingPage() {
             </motion.div>
           </motion.div>
         </main>
-      </div>
+        </div>
     </div>
   );
 }
