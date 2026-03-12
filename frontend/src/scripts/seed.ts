@@ -1,8 +1,8 @@
 // scripts/seed.ts
 import { db } from '@/db'
 import { 
-  users, 
-  sessions, 
+  user,
+  account,
   userStats,
   readingTests, 
   readingSections, 
@@ -12,6 +12,7 @@ import {
 } from '@/db/schema'
 import argon2 from 'argon2'
 import { eq } from 'drizzle-orm'
+import { v7 as uuidv7 } from 'uuid'
 
 async function seed() {
   console.log('🌱 Starting seeding...')
@@ -22,20 +23,24 @@ async function seed() {
     // ============================================
     console.log('\n📝 Creating test user...')
     
-    // const hashedPassword = await hash('Password123!', {
-    //   memoryCost: 19456,
-    //   timeCost: 2,
-    //   outputLen: 32,
-    //   parallelism: 1
-    // })
+    const hashedPassword = await argon2.hash('Password123!')
+    const userId = 'user_' + uuidv7()
 
-    const hashedPassword = await argon2.hash('#shadid2005@')
-
-    const [testUser] = await db.insert(users).values({
-      fullName: 'Test User',
+    const [testUser] = await db.insert(user).values({
+      id: userId,
+      name: 'Test User',
       email: 'test@example.com',
-      password: hashedPassword,
+      emailVerified: true,
     }).returning()
+
+    // Create account with password for Better Auth
+    await db.insert(account).values({
+      id: 'account_' + uuidv7(),
+      accountId: userId,
+      providerId: 'credential',
+      userId: testUser.id,
+      password: hashedPassword,
+    })
 
     console.log('✅ Test user created:', testUser.email)
 
@@ -295,12 +300,7 @@ async function seed() {
           { id: 'C', text: 'Crop failure' },
           { id: 'D', text: 'Species extinction' }
         ],
-        correctAnswer: JSON.stringify({
-          'Pacific Islands': 'A',
-          'Sub-Saharan Africa': 'B',
-          'Midwest USA': 'C',
-          'Amazon Rainforest': 'D'
-        }),
+        correctAnswer: 'A-Pacific Islands,B-Sub-Saharan Africa,C-Midwest USA,D-Amazon Rainforest',
         explanation: 'Different regions face different primary impacts.',
         metadata: {
           matches: [
@@ -432,12 +432,12 @@ async function createQuestionsForSection(sectionId: string, questions: Array<{
       sectionId,
       questionText: q.text,
       questionType: q.type,
-      options: q.options ? JSON.stringify(q.options) : null,
+      options: q.options || null,
       correctAnswer: q.correctAnswer,
       explanation: q.explanation || null,
       questionNumber: q.number,
       points: 1,
-      metadata: q.metadata ? JSON.stringify(q.metadata) : null,
+      metadata: q.metadata || null,
     })
   }
 }
