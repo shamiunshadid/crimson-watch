@@ -3,6 +3,7 @@ import { Instrument_Serif, Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/Theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
+import { QueryProvider } from "@/providers/query-provider";
 
 const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -49,8 +50,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+        <QueryProvider>
         {children}
         <Toaster position="top-center" richColors/>
+        </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
