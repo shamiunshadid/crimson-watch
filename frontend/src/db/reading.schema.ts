@@ -24,7 +24,9 @@ export const readingTests = pgTable("reading_tests", {
     orderIndex: integer("order_index").default(0),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull(),
     deletedAt: timestamp("deleted_at"),
 
     publishedAt: timestamp("published_at"),
@@ -42,7 +44,9 @@ export const readingSections = pgTable("reading_sections", {
     description: text("description"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull(),
 });
 
 export const readingQuestions = pgTable("reading_questions", {
@@ -63,7 +67,9 @@ export const readingQuestions = pgTable("reading_questions", {
     metadata: jsonb("metadata"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull(),
 });
 
 export const testAttempts = pgTable("test_attempts", {
@@ -82,7 +88,9 @@ export const testAttempts = pgTable("test_attempts", {
     bandScore: decimal("band_score", { precision: 3, scale: 1 }),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull(),
 });
 
 export const questionResponses = pgTable("question_responses", {
@@ -100,5 +108,7 @@ export const questionResponses = pgTable("question_responses", {
     isSubmitted: boolean("is_submitted").default(false).notNull(),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull(),
 });
